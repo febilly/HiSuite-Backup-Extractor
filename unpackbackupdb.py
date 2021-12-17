@@ -6,9 +6,9 @@ import os
 import sqlite3
 
 import sys
+import importlib
 
-reload(sys)
-sys.setdefaultencoding('utf-8')
+importlib.reload(sys)
 
 
 def get_max_index(db):
@@ -23,8 +23,8 @@ def get_max_index(db):
         for row in cur:
             maxindex = row[0]
             break
-    except Exception, e:
-        print Exception, ':', e
+    except Exception as e:
+        print((Exception, ':', e))
 
     return maxindex
 
@@ -42,8 +42,8 @@ def get_file_path(db, file_index):
             # print(row[1])
             file_path = row[1]
             break
-    except Exception, e:
-        print Exception, ':', e
+    except Exception as e:
+        print((Exception, ':', e))
 
     cur.close()
 
@@ -62,22 +62,22 @@ def get_file_data(db, file_index, file_path):
 
     # Go through returned rows
     try:
-        if not os.path.exists(u'%s' % os.path.dirname(file_path)):
-            os.makedirs(u'%s' % os.path.dirname(file_path))
-        with codecs.open(u'%s' % file_path, 'wb') as f:
+        if not os.path.exists('%s' % os.path.dirname(file_path)):
+            os.makedirs('%s' % os.path.dirname(file_path))
+        with codecs.open('%s' % file_path, 'wb') as f:
             for index, row in enumerate(cur):
                 data_index = row[0]
                 file_index = row[1]
                 file_length = row[2]
                 file_data = row[3]
-                print 'write file'
+                print('write file')
                 f.write(file_data)
-                print 'file writed'
+                print('file writed')
 
             f.close()
             status = True
-    except Exception, e:
-        print Exception, ':', e
+    except Exception as e:
+        print((Exception, ':', e))
 
     cur.close()
 
@@ -87,33 +87,33 @@ def get_file_data(db, file_index, file_path):
 def extract_from_file(db_file, local_path):
     max_index = get_max_index(db_file)
 
-    for fileindex in xrange(0, max_index + 1):
+    for fileindex in range(0, max_index + 1):
         path = local_path + get_file_path(db_file, fileindex).replace(r'/', '\\')
-        print path
+        print(path)
         if not get_file_data(db_file, fileindex, path):
-            print 'FALSE'
+            print('FALSE')
             break
 
 
 def extract_from_path(backup_path, local_path):
     huawei_system_db = ['alarm.db', 'calendar.db', 'calllog.db', 'contact.db', 'harassment.db', 'HWlanucher.db',
                         'phoneManager.db', 'smartcare.db', 'sms.db', 'weather.db', 'wifiConfig.db']
-    for root, subdir, files in os.walk(unicode(backup_path, 'utf-8')):
+    for root, subdir, files in os.walk(str(backup_path)):
         for filename in files:
             if filename.endswith('.db') and filename not in huawei_system_db:
                 filepath = os.path.join(root, filename)
-                print filepath
+                print(filepath)
                 extract_from_file(filepath, local_path)
 
 
 if __name__ == '__main__':
     # Target dir
-    ex_path = r'F:\targetdir'
+    ex_path = r'somewhere'
     
     # extract from single db file
-    #db_file_path = r'M:\backupdir\com.tencent.mm.db'
+    #db_file_path = r'M:\backupdir\com.tencent.mm.db'   # ..?
     #extract_from_file(db_file_path, ex_path)
     
     # extract from backup directory
-    bak_path = r'M:\backupdir'
+    bak_path = r'somewhere'
     extract_from_path(bak_path, ex_path)
